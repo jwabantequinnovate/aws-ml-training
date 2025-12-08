@@ -194,8 +194,9 @@ class TextPreprocessor:
             words = text.split()
             filtered_words = [word for word in words if word not in stop_words]
             return ' '.join(filtered_words)
-        except:
-            # If NLTK not available, return original text
+        except (ImportError, LookupError) as e:
+            # If NLTK not available or stopwords not downloaded, return original text
+            print(f"Warning: NLTK stopwords not available ({e}). Returning original text.")
             return text
 
 

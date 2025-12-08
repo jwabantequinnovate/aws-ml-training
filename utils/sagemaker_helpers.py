@@ -31,7 +31,8 @@ class SageMakerHelper:
         
         try:
             self.role = role or get_execution_role()
-        except:
+        except ValueError:
+            # Not running in SageMaker environment
             self.role = role
             
         self.bucket = self.session.default_bucket()
@@ -253,8 +254,8 @@ class SageMakerHelper:
                 EndpointName=endpoint_name
             )
             config_name = response['EndpointConfigName']
-        except:
-            print(f"Endpoint {endpoint_name} not found")
+        except self.sagemaker_client.exceptions.ClientError as e:
+            print(f"Endpoint {endpoint_name} not found: {e}")
             return
         
         # Delete endpoint
@@ -278,8 +279,8 @@ class SageMakerHelper:
                 if delete_model:
                     self.sagemaker_client.delete_model(ModelName=model_name)
                     print(f"✓ Model {model_name} deleted")
-            except:
-                pass
+            except Exception as e:
+                print(f"Warning: Could not delete config/model: {e}")
     
     def create_batch_transform_job(
         self,
