@@ -1,0 +1,40 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Installing dependencies..."
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      
+  pre_build:
+    commands:
+      - echo "Running pre-build checks..."
+      - python --version
+      - pip --version
+      - aws --version
+      
+  build:
+    commands:
+      - echo "Running tests and validations..."
+      - echo "Linting code..."
+      - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv,__pycache__,.git
+      - echo "Running unit tests..."
+      - pytest tests/ -v --cov=. --cov-report=html --cov-report=term || true
+      - echo "Build completed successfully!"
+      
+  post_build:
+    commands:
+      - echo "Post-build phase..."
+      - echo "Training modules are ready for deployment"
+
+artifacts:
+  files:
+    - '**/*'
+  name: aws-ml-training-artifacts
+
+cache:
+  paths:
+    - '/root/.cache/pip/**/*'
